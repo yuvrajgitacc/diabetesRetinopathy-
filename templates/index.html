@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OptiGemma — AI-Driven Predictive Retinal Suite</title>
+    <meta name="description" content="OptiGemma: AI-powered Diabetic Retinopathy detection, patient management, and clinical reporting. Powered by Gemma-4.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+        <div class="sidebar-logo">
+            <svg viewBox="0 0 40 40" fill="none" width="32" height="32">
+                <circle cx="20" cy="20" r="18" stroke="url(#sg1)" stroke-width="2.5"/>
+                <circle cx="20" cy="20" r="10" stroke="url(#sg1)" stroke-width="1.5"/>
+                <circle cx="20" cy="20" r="4" fill="url(#sg1)"/>
+                <defs><linearGradient id="sg1" x1="0" y1="0" x2="40" y2="40">
+                    <stop offset="0%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#8b5cf6"/>
+                </linearGradient></defs>
+            </svg>
+            <div>
+                <span class="logo-title">OptiGemma</span>
+                <span class="logo-sub">Clinical Suite v2.0</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-page="dashboard" onclick="navigateTo('dashboard')">
+                <span class="nav-icon">📊</span><span class="nav-label">Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-page="scan" onclick="navigateTo('scan')">
+                <span class="nav-icon">🔬</span><span class="nav-label">New Scan</span>
+            </a>
+            <a href="#" class="nav-item" data-page="batch" onclick="navigateTo('batch')">
+                <span class="nav-icon">📋</span><span class="nav-label">Batch Upload</span>
+            </a>
+            <a href="#" class="nav-item" data-page="patients" onclick="navigateTo('patients')">
+                <span class="nav-icon">👥</span><span class="nav-label">Patients</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark/Light Mode">
+                <span id="theme-icon">🌙</span>
+            </div>
+            <div class="sidebar-badges">
+                <span class="mini-badge">Gemma-4</span>
+                <span class="mini-badge green">HEI-MED</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main id="main-content">
+
+        <!-- ============ DASHBOARD PAGE ============ -->
+        <section id="page-dashboard" class="page active">
+            <div class="page-header">
+                <div>
+                    <h1>Dashboard</h1>
+                    <p class="page-subtitle">Overview of your clinical activity</p>
+                </div>
+                <button class="btn btn-primary" onclick="navigateTo('scan')">
+                    <span>🔬</span> New Scan
+                </button>
+            </div>
+
+            <div class="stats-grid" id="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-icon">👥</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-patients">0</span>
+                        <span class="stat-label">Total Patients</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">🔬</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-scans">0</span>
+                        <span class="stat-label">Total Scans</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">✅</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-healthy">0</span>
+                        <span class="stat-label">Healthy (Stage 0)</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-icon">⚠️</span>
+                    <div class="stat-info">
+                        <span class="stat-value" id="stat-atrisk">0</span>
+                        <span class="stat-label">At Risk (Stage 1+)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Scans -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Recent Scans</h2>
+                </div>
+                <div id="recent-scans-list" class="table-container">
+                    <p class="empty-state">No scans yet. Start by creating a new scan.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ NEW SCAN PAGE ============ -->
+        <section id="page-scan" class="page">
+            <div class="page-header">
+                <div>
+                    <h1>New Scan</h1>
+                    <p class="page-subtitle">Upload a fundus image for AI analysis</p>
+                </div>
+            </div>
+
+            <div class="scan-layout">
+                <!-- Step 1: Patient Selection -->
+                <div class="card" id="scan-step-patient">
+                    <div class="card-header"><h2>1. Select or Create Patient</h2></div>
+                    <div class="card-body">
+                        <div class="patient-select-tabs">
+                            <button class="tab-btn active" onclick="switchScanTab('existing')">Existing Patient</button>
+                            <button class="tab-btn" onclick="switchScanTab('new')">New Patient</button>
+                            <button class="tab-btn" onclick="switchScanTab('quick')">Quick Scan (No Patient)</button>
+                        </div>
+
+                        <!-- Existing patient search -->
+                        <div id="scan-tab-existing" class="scan-tab active">
+                            <input type="text" id="scan-patient-search" placeholder="Search by name or ID..."
+                                   oninput="searchPatientsForScan(this.value)" class="input-field">
+                            <div id="scan-patient-results" class="patient-search-results"></div>
+                        </div>
+
+                        <!-- New patient form -->
+                        <div id="scan-tab-new" class="scan-tab" style="display:none;">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>Patient Name *</label>
+                                    <input type="text" id="new-patient-name" placeholder="e.g. Rajesh Kumar" class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label>Age</label>
+                                    <input type="number" id="new-patient-age" placeholder="e.g. 55" class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label>Gender</label>
+                                    <select id="new-patient-gender" class="input-field">
+                                        <option value="">Select</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>Diabetes Duration (years)</label>
+                                    <input type="number" id="new-patient-diabetes" placeholder="e.g. 10" class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label>Blood Sugar (mg/dL)</label>
+                                    <input type="number" id="new-patient-sugar" placeholder="e.g. 140" class="input-field">
+                                </div>
+                                <div class="form-group">
+                                    <label>HbA1c (%)</label>
+                                    <input type="number" id="new-patient-hba1c" placeholder="e.g. 7.5" step="0.1" class="input-field">
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" onclick="createPatientAndSelect()">Create Patient</button>
+                        </div>
+
+                        <!-- Quick scan (no patient) -->
+                        <div id="scan-tab-quick" class="scan-tab" style="display:none;">
+                            <p class="info-text">Quick scan without patient record. Results won't be saved to history.</p>
+                            <button class="btn btn-outline" onclick="selectQuickScan()">Continue Without Patient</button>
+                        </div>
+
+                        <div id="selected-patient-banner" class="selected-banner" style="display:none;">
+                            <span id="selected-patient-info"></span>
+                            <button class="btn-small btn-ghost" onclick="clearSelectedPatient()">Change</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Upload Image -->
+                <div class="card" id="scan-step-upload" style="opacity:0.5;pointer-events:none;">
+                    <div class="card-header"><h2>2. Upload Fundus Image</h2></div>
+                    <div class="card-body">
+                        <div class="upload-area" id="scan-drop-zone">
+                            <div class="upload-placeholder">
+                                <span class="upload-icon-large">👁️</span>
+                                <h3>Drop fundus image here</h3>
+                                <p>or click to browse • PNG, JPG, TIFF • Max 16MB</p>
+                            </div>
+                            <input type="file" id="scan-file-input" accept="image/*" hidden>
+                        </div>
+                        <div id="scan-preview" style="display:none;">
+                            <img id="scan-preview-img" alt="Preview">
+                            <div class="preview-bar">
+                                <span id="scan-preview-name"></span>
+                                <button class="btn-small btn-ghost" onclick="clearScanImage()">Remove</button>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-large" id="run-analysis-btn"
+                                onclick="runAnalysis()" style="display:none;">
+                            🔬 Run Complete Analysis
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="scan-loading" class="card" style="display:none;">
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <h3>Analyzing fundus image...</h3>
+                    <div class="loading-steps" id="scan-loading-steps">
+                        <div class="lstep" id="ls-preprocess">Preprocessing image...</div>
+                        <div class="lstep" id="ls-detect">Running AI detection...</div>
+                        <div class="lstep" id="ls-segment">Mapping blood vessels...</div>
+                        <div class="lstep" id="ls-heatmap">Generating heatmap...</div>
+                        <div class="lstep" id="ls-report">Gemma-4 generating report...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results (reused from v1 but cleaner) -->
+            <div id="scan-results" style="display:none;">
+                <!-- Severity Banner -->
+                <div class="card result-banner" id="result-banner">
+                    <div class="result-banner-content">
+                        <div class="result-gauge" id="result-gauge">
+                            <svg viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="52" stroke="var(--border)" stroke-width="8" fill="none"/>
+                                <circle cx="60" cy="60" r="52" stroke="#06b6d4" stroke-width="8" fill="none"
+                                        stroke-dasharray="327" stroke-dashoffset="327" stroke-linecap="round"
+                                        id="result-gauge-circle"/>
+                            </svg>
+                            <div class="gauge-center">
+                                <span class="gauge-num" id="result-stage">-</span>
+                                <span class="gauge-lbl">Stage</span>
+                            </div>
+                        </div>
+                        <div class="result-info">
+                            <h2 id="result-name">—</h2>
+                            <p id="result-confidence">Confidence: —%</p>
+                            <div class="result-stats">
+                                <span class="result-stat-pill"><span class="pill-icon">⏱</span> <span class="pill-val" id="result-time">—s</span></span>
+                                <span class="result-stat-pill"><span class="pill-icon">🎯</span> Conf: <span class="pill-val" id="result-conf-pill">—%</span></span>
+                                <span class="result-stat-pill" id="result-risk-pill"><span class="pill-icon">📊</span> Risk: <span class="pill-val" id="result-risk-level">—</span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Images Row -->
+                <div class="images-row">
+                    <div class="img-card"><h4>Original Scan</h4><div class="img-frame"><img id="r-original" alt="Original"></div></div>
+                    <div class="img-card"><h4>Vessel Map</h4><div class="img-frame"><img id="r-vessels" alt="Vessels"></div><p class="img-cap" id="r-vessel-cap">—</p></div>
+                    <div class="img-card"><h4>AI Heatmap</h4><div class="img-frame"><img id="r-heatmap" alt="Heatmap"></div><p class="img-cap" id="r-heatmap-cap">—</p></div>
+                </div>
+
+                <!-- Probability Bars -->
+                <div class="card"><div class="card-header"><h2>Stage Probability Distribution</h2></div>
+                    <div class="card-body" id="result-prob-bars"></div>
+                </div>
+
+                <!-- Gemma Report -->
+                <div class="card report-card">
+                    <div class="card-header">
+                        <h2>🧬 OptiGemma Diagnostic Report</h2>
+                        <div class="report-actions">
+                            <select id="report-language" onchange="translateReport()">
+                                <option value="english">English</option>
+                                <option value="hindi">हिंदी</option>
+                                <option value="gujarati">ગુજરાતી</option>
+                            </select>
+                            <button class="btn-download" onclick="downloadReport()">📥 Download Report</button>
+                        </div>
+                    </div>
+                    <div class="card-body report-body">
+                        <div class="report-section"><span class="rs-icon">🔍</span><div class="rs-content"><h4>Current Status</h4><p id="rpt-diagnosis">—</p></div></div>
+                        <div class="report-section"><span class="rs-icon">👁️</span><div class="rs-content"><h4>Visual Findings</h4><p id="rpt-heatmap">—</p><p id="rpt-vessels">—</p></div></div>
+                        <div class="report-section"><span class="rs-icon">📊</span><div class="rs-content"><h4>Risk Prediction</h4>
+                            <div class="risk-row">
+                                <div class="risk-box"><h5>6-Month</h5><div class="risk-val" id="rpt-6m-pct">—</div><p class="risk-bad" id="rpt-6m-bad">—</p><p class="risk-good" id="rpt-6m-good">—</p></div>
+                                <div class="risk-box"><h5>12-Month</h5><div class="risk-val" id="rpt-12m-pct">—</div><p class="risk-bad" id="rpt-12m-bad">—</p><p class="risk-good" id="rpt-12m-good">—</p></div>
+                            </div>
+                        </div></div>
+                        <div class="report-section"><span class="rs-icon">✅</span><div class="rs-content"><h4>Action Plan</h4><ul id="rpt-actions"></ul></div></div>
+                        <div class="report-section"><span class="rs-icon">🥗</span><div class="rs-content"><h4>Diet Recommendations</h4><ul id="rpt-diet"></ul></div></div>
+                        <div class="report-section"><span class="rs-icon">📅</span><div class="rs-content"><h4>Follow-Up</h4><p id="rpt-followup">—</p></div></div>
+                        <div class="disclaimer">⚠️ AI-assisted screening tool. Consult a qualified ophthalmologist for final diagnosis.</div>
+                    </div>
+                </div>
+
+                <div class="actions-bar">
+                    <button class="btn btn-primary" onclick="resetScan()">🔄 New Scan</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ BATCH UPLOAD PAGE ============ -->
+        <section id="page-batch" class="page">
+            <div class="page-header">
+                <div>
+                    <h1>Batch Upload</h1>
+                    <p class="page-subtitle">Process multiple patients at once</p>
+                </div>
+            </div>
+
+            <div class="batch-layout">
+                <!-- Left: Add to Queue Form -->
+                <div class="card">
+                    <div class="card-header"><h2>Add Patient to Queue</h2></div>
+                    <div class="card-body">
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Patient Name *</label>
+                                <input type="text" id="batch-name" placeholder="Patient name" class="input-field">
+                            </div>
+                            <div class="form-group">
+                                <label>Age</label>
+                                <input type="number" id="batch-age" placeholder="Age" class="input-field">
+                            </div>
+                            <div class="form-group">
+                                <label>Gender</label>
+                                <select id="batch-gender" class="input-field">
+                                    <option value="">Select</option>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Diabetes (years)</label>
+                                <input type="number" id="batch-diabetes" placeholder="e.g. 10" class="input-field">
+                            </div>
+                            <div class="form-group">
+                                <label>Sugar (mg/dL)</label>
+                                <input type="number" id="batch-sugar" placeholder="e.g. 140" class="input-field">
+                            </div>
+                            <div class="form-group">
+                                <label>HbA1c (%)</label>
+                                <input type="number" id="batch-hba1c" placeholder="e.g. 7.5" step="0.1" class="input-field">
+                            </div>
+                        </div>
+                        <div class="upload-area upload-small" id="batch-drop-zone">
+                            <span>👁️ Drop fundus image or click to browse</span>
+                            <input type="file" id="batch-file-input" accept="image/*" hidden>
+                        </div>
+                        <div id="batch-preview" style="display:none;">
+                            <img id="batch-preview-img" alt="Preview" class="batch-thumb">
+                            <span id="batch-preview-name"></span>
+                        </div>
+                        <button class="btn btn-primary" onclick="addToQueue()" style="margin-top:16px;">
+                            ➕ Add to Queue
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Queue Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2>Processing Queue</h2>
+                        <button class="btn-small btn-primary" id="start-batch-btn"
+                                onclick="startBatchProcessing()" style="display:none;">
+                            ▶️ Start Processing
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="batch-queue" class="batch-queue">
+                            <p class="empty-state">Queue is empty. Add patients above.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ PATIENTS PAGE ============ -->
+        <section id="page-patients" class="page">
+            <div class="page-header">
+                <div>
+                    <h1>Patients</h1>
+                    <p class="page-subtitle">Manage patient records</p>
+                </div>
+                <div class="header-actions">
+                    <input type="text" id="patients-search" placeholder="Search patients..."
+                           oninput="loadPatients(this.value)" class="input-field search-input">
+                    <button class="btn btn-primary" onclick="navigateTo('scan')">+ Add Patient</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div id="patients-table-container" class="table-container">
+                    <p class="empty-state">No patients yet.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ PATIENT DETAIL PAGE ============ -->
+        <section id="page-patient-detail" class="page">
+            <!-- Professional Header -->
+            <div class="pd-header">
+                <button class="btn-small btn-ghost" onclick="navigateTo('patients')">← Back to Patients</button>
+                <div class="pd-hero">
+                    <div class="pd-avatar" id="pd-avatar">RK</div>
+                    <div class="pd-hero-info">
+                        <h1 id="pd-name">Patient</h1>
+                        <p class="pd-meta" id="pd-subtitle">—</p>
+                    </div>
+                    <div class="pd-hero-stats" id="pd-hero-stats"></div>
+                    <button class="btn btn-outline" onclick="editPatient(currentDetailPatientId)" style="margin-left:auto">✏️ Edit</button>
+                    <button class="btn btn-primary" onclick="scanForPatient()">+ New Scan</button>
+                </div>
+            </div>
+
+            <!-- Risk Indicator -->
+            <div class="card" id="pd-risk-card">
+                <div class="card-body" style="padding:16px 20px;">
+                    <div class="pd-risk-row">
+                        <div class="pd-risk-item">
+                            <span class="pd-risk-label">Last Stage</span>
+                            <span class="pd-risk-value" id="pd-last-stage">—</span>
+                        </div>
+                        <div class="pd-risk-item" style="flex:2;">
+                            <span class="pd-risk-label">Risk Level</span>
+                            <div class="pd-risk-bar-track">
+                                <div class="pd-risk-bar-fill" id="pd-risk-fill" style="width:10%"></div>
+                            </div>
+                        </div>
+                        <div class="pd-risk-item">
+                            <span class="pd-risk-label">Total Scans</span>
+                            <span class="pd-risk-value" id="pd-scan-count">0</span>
+                        </div>
+                        <div class="pd-risk-item">
+                            <span class="pd-risk-label">Last Scan</span>
+                            <span class="pd-risk-value" id="pd-last-scan-date">—</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan History -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Scan History</h2>
+                </div>
+                <div id="pd-scans-list" class="table-container">
+                    <p class="empty-state">No scans for this patient.</p>
+                </div>
+            </div>
+
+            <!-- Progression Chart -->
+            <div class="card" id="pd-progression-card" style="display:none;">
+                <div class="card-header"><h2>Progression Timeline</h2></div>
+                <div class="card-body">
+                    <div id="pd-progression" class="progression-timeline"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="app-footer">
+        <p>OptiGemma v2.0 — Bridging the gap between lab reports and patient understanding</p>
+        <p class="footer-sub">Gemma-4 Hackathon • Not for clinical use without specialist oversight</p>
+    </footer>
+
+    <!-- Edit Patient Modal -->
+    <div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:999;align-items:center;justify-content:center;">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:28px;width:420px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+            <h2 style="margin-bottom:16px;font-size:1.2rem;">✏️ Edit Patient</h2>
+            <input type="hidden" id="edit-pid">
+            <div style="display:grid;gap:12px;">
+                <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Name</label><input id="edit-name" class="input-field" style="width:100%;"></div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Age</label><input id="edit-age" type="number" class="input-field" style="width:100%;"></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Gender</label><select id="edit-gender" class="input-field" style="width:100%;"><option value="">—</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;">
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Diabetes (yrs)</label><input id="edit-diabetes" type="number" class="input-field" style="width:100%;"></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">Sugar (mg/dL)</label><input id="edit-sugar" type="number" class="input-field" style="width:100%;"></div>
+                    <div><label style="font-size:0.75rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:4px;">HbA1c (%)</label><input id="edit-hba1c" type="number" step="0.1" class="input-field" style="width:100%;"></div>
+                </div>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:20px;">
+                <button class="btn btn-outline" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEditPatient()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+# ============================================
+# OptiGemma .gitignore — SAFE PUSH
+# ============================================
+
+# === CRITICAL: API Keys & Secrets ===
+.env
+.env.local
+.env.production
+*.key
+optigemma.db
+
+# === Virtual Environment ===
+venv/
+env/
+.venv/
+
+# === Large Model Files (too big for GitHub) ===
+models/*.h5
+models/*.pt
+models/vessel_model/*.pt
+models/vessel_model/*.pth
+
+# === Python Cache ===
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# === Generated Files ===
+results/
+uploads/
+newprint.pdf
+
+# === Downloaded Dataset Images ===
+data/heimed/*.jpg
+data/heimed/*.meta
+data/heimed/*.GND
+data/heimed/validation_report.json
+data/aptos/
+
+# === IDE / Editor ===
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# === OS Files ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Gemini/Antigravity ===
+.gemini/

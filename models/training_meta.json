@@ -1,0 +1,7 @@
+{
+  "model": "EfficientNet-B3",
+  "input_size": 300,
+  "num_classes": 5,
+  "trained_at": "2026-05-10 16:58:12",
+  "framework": "PyTorch"
+}
